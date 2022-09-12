@@ -1,0 +1,29 @@
+package hello.core.order;
+
+import hello.core.discount.DiscountPolicy;
+import hello.core.discount.FixDiscountPolicy;
+import hello.core.discount.RateDiscountPolicy;
+import hello.core.member.Member;
+import hello.core.member.MemberRepository;
+import hello.core.member.MemoryMemberRepository;
+
+public class OrderServiceImpl implements OrderService {
+
+    private final MemberRepository memberRepository;
+    private final DiscountPolicy discountPolicy;
+
+    public OrderServiceImpl(MemberRepository memberRepository, DiscountPolicy discountPolicy) {
+        this.memberRepository = memberRepository;
+        this.discountPolicy = discountPolicy;
+    }
+
+    @Override
+    public Order createOrder(Long memberId, String itemName, int itemPrice) {
+        Member member = memberRepository.findById(memberId);
+        //SRP -- this 입장에서는 할인정책에 관련된 정보를 알지도 못하고 알 필요도 없음
+        //할인정책에 변경사항이 필요하면 DiscountPolicy에서 핸들하면 됨
+        int discountPrice = discountPolicy.discount(member, itemPrice);
+
+        return new Order(memberId, itemName, itemPrice, discountPrice);
+    }
+}
